@@ -212,7 +212,7 @@ void setup()
     dof.setAccelODR(dof.A_ODR_400); // Set accelerometer update rate at 400 Hz
  // Accelerometer anti-aliasing filter rate can be 50, 194, 362, or 763 Hz
  // Anti-aliasing acts like a low-pass filter allowing oversampling of accelerometer and rejection of high-frequency spurious noise.
- // Strategy here is to effectively oversample accelerometer at 400 Hz and use a 1940 Hz anti-aliasing (low-pass) filter frequency
+ // Strategy here is to effectively oversample accelerometer at 400 Hz and use a 194 Hz anti-aliasing (low-pass) filter frequency
  // to get a smooth ~200 Hz response rate
     dof.setAccelABW(dof.A_ABW_194);
  
@@ -221,7 +221,7 @@ void setup()
     dof.setGyroODR(dof.G_ODR_380_BW_20);  // Set gyro update rate to 380 Hz with the smallest bandwidth for low noise
 
  // Magnetometer output data rate can be: 3.125 (ODR_3125), 6.25 (ODR_625), 12.5 (ODR_125), 25, 50, or 100 Hz
-    dof.setMagODR(dof.M_ODR_125); // Set magnetometer to update every 40 ms
+    dof.setMagODR(dof.M_ODR_125); // Set magnetometer to update every 80 ms
 }
 
 void loop()
