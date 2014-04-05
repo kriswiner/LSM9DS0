@@ -207,7 +207,7 @@ void setup()
     dof.setMagScale(dof.M_SCALE_2GS);
   
  // Set output data rates  
- // Accelerometer output data rate (ODR) can be: A_ODR_3125 (3.225 Hz), A_ODR_625 (6.25 Hz), A_ODR_125 (12.5 Hz), A_ODR_25, A_ODR_50, 
+ // Accelerometer output data rate (ODR) can be: A_ODR_3125 (3.125 Hz), A_ODR_625 (6.25 Hz), A_ODR_125 (12.5 Hz), A_ODR_25, A_ODR_50, 
  //                                              A_ODR_100,  A_ODR_200, A_ODR_400, A_ODR_800, A_ODR_1600 (1600 Hz)
     dof.setAccelODR(dof.A_ODR_400); // Set accelerometer update rate at 400 Hz
  // Accelerometer anti-aliasing filter rate can be 50, 194, 362, or 763 Hz
