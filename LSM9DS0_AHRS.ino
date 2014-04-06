@@ -126,7 +126,7 @@ const byte INT2XM = 3; // INT2XM tells us when mag data is ready
 const byte DRDYG  = 4; // DRDYG  tells us when gyro data is ready
 
 // global constants for 9 DoF fusion and AHRS (Attitude and Heading Reference System)
-#define GyroMeasError PI * (40.0f / 180.0f)       // gyroscope measurement error in rads/s (shown as 40 deg/s)
+#define GyroMeasError PI * (40.0f / 180.0f)       // gyroscope measurement error in rads/s (shown as 3 deg/s)
 #define GyroMeasDrift PI * (0.0f / 180.0f)      // gyroscope measurement drift in rad/s/s (shown as 0.0 deg/s/s)
 // There is a tradeoff in the beta parameter between accuracy and response speed.
 // In the original Madgwick study, beta of 0.041 (corresponding to GyroMeasError of 2.7 degrees/s) was found to give optimal accuracy.
@@ -145,11 +145,11 @@ uint16_t count = 0;  // used to control display output rate
 uint16_t delt_t = 0; // used to control display output rate
 float pitch, yaw, roll, heading;
 float deltat = 0.0f;        // integration interval for both filter schemes
-uint16_t lastUpdate = 0; // used to calculate integration interval
-uint16_t now = 0;        // used to calculate integration interval
+uint16_t lastUpdate = 0;    // used to calculate integration interval
+uint16_t now = 0;           // used to calculate integration interval
 
 float ax, ay, az, gx, gy, gz, mx, my, mz; // variables to hold latest sensor data values 
-float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    //vector to hold quaternion
+float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
 float eInt[3] = {0.0f, 0.0f, 0.0f};       // vector to hold integral error for Mahony method
 
 void setup()
@@ -168,11 +168,11 @@ void setup()
 // Start device display with ID of sensor
   display.clearDisplay();
   display.setTextSize(2);
-  display.setCursor(0,0);  display.print("LSM9SD0");
+  display.setCursor(0,0);  display.print("LSM9DS0");
   display.setTextSize(1);
   display.setCursor(0, 20); display.print("9 DOF sensor");
-  display.setCursor(20, 30); display.print("IMU");
-  display.setCursor(0, 40); display.print("data fusion");
+  display.setCursor(5, 30); display.print("data fusion");
+  display.setCursor(20, 40); display.print("AHRS");
   display.display();
   delay(2000);
 
@@ -207,18 +207,18 @@ void setup()
     dof.setMagScale(dof.M_SCALE_2GS);
   
  // Set output data rates  
- // Accelerometer output data rate (ODR) can be: A_ODR_3125 (3.125 Hz), A_ODR_625 (6.25 Hz), A_ODR_125 (12.5 Hz), A_ODR_25, A_ODR_50, 
+ // Accelerometer output data rate (ODR) can be: A_ODR_3125 (3.225 Hz), A_ODR_625 (6.25 Hz), A_ODR_125 (12.5 Hz), A_ODR_25, A_ODR_50, 
  //                                              A_ODR_100,  A_ODR_200, A_ODR_400, A_ODR_800, A_ODR_1600 (1600 Hz)
-    dof.setAccelODR(dof.A_ODR_400); // Set accelerometer update rate at 400 Hz
+    dof.setAccelODR(dof.A_ODR_100); // Set accelerometer update rate at 100 Hz
  // Accelerometer anti-aliasing filter rate can be 50, 194, 362, or 763 Hz
  // Anti-aliasing acts like a low-pass filter allowing oversampling of accelerometer and rejection of high-frequency spurious noise.
- // Strategy here is to effectively oversample accelerometer at 400 Hz and use a 194 Hz anti-aliasing (low-pass) filter frequency
- // to get a smooth ~200 Hz response rate
-    dof.setAccelABW(dof.A_ABW_194);
+ // Strategy here is to effectively oversample accelerometer at 100 Hz and use a 50 Hz anti-aliasing (low-pass) filter frequency
+ // to get a smooth ~150 Hz filter update rate
+    dof.setAccelABW(dof.A_ABW_50); // Choose lowest filter setting for low noise
  
  // Gyro output data rates can be: 95 Hz (bandwidth 12.5 or 25 Hz), 190 Hz (bandwidth 12.5, 25, 50, or 70 Hz)
  //                                 380 Hz (bandwidth 20, 25, 50, 100 Hz), or 760 Hz (bandwidth 30, 35, 50, 100 Hz)
-    dof.setGyroODR(dof.G_ODR_380_BW_20);  // Set gyro update rate to 380 Hz with the smallest bandwidth for low noise
+    dof.setGyroODR(dof.G_ODR_190_BW_125);  // Set gyro update rate to 190 Hz with the smallest bandwidth for low noise
 
  // Magnetometer output data rate can be: 3.125 (ODR_3125), 6.25 (ODR_625), 12.5 (ODR_125), 25, 50, or 100 Hz
     dof.setMagODR(dof.M_ODR_125); // Set magnetometer to update every 80 ms
@@ -254,7 +254,7 @@ void loop()
   // This is ok by aircraft orientation standards!  
   // Pass gyro rate as rad/s
    MadgwickQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f, mx, my, mz);
-// MahonyQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f, mx, my, mz);
+ //MahonyQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f, mx, my, mz);
 
     // Serial print and/or display at 0.5 s rate independent of data rates
     delt_t = millis() - count;
@@ -314,14 +314,21 @@ void loop()
     display.setCursor(48, 32); display.print((int)(roll)); 
     display.setCursor(66, 32); display.print("ypr");  
   
-    // With these settings the filter is updating at a ~125 Hz rate using the Madgwick scheme and 
-    // ~165 Hz using the Mahony scheme even though the display refreshes at only 2 Hz.
+    // With ODR settings of 400 Hz, 380 Hz, and 25 Hz for the accelerometer, gyro, and magnetometer, respectively,
+    // the filter is updating at a ~125 Hz rate using the Madgwick scheme and ~165 Hz using the Mahony scheme 
+    // even though the display refreshes at only 2 Hz.
+    // The filter update rate can be increased by reducing the rate of data reading. The optimal implementation is
+    // one which balances the competing rates so they are about the same; that is, the filter updates the sensor orientation
+    // at about the same rate the data is changing. Of course, other implementations are possible. One might consider
+    // updating the filter at twice the average new data rate to allow for finite filter convergence times.
     // The filter update rate is determined mostly by the mathematical steps in the respective algorithms, 
-    // the processor speed (8 MHz for the 3.3V Pro Mini), and  to some extent the magnetometer ODR:
+    // the processor speed (8 MHz for the 3.3V Pro Mini), and the sensor ODRs, especially the magnetometer ODR:
     // smaller ODRs for the magnetometer produce the above rates, maximum magnetometer ODR of 100 Hz produces
     // filter update rates of ~110 and ~135 Hz for the Madgwick and Mahony schemes, respectively. 
     // This is presumably because the magnetometer read takes longer than the gyro or accelerometer reads.
-    // This filter update rate should be fast enough to maintain accurate platform orientation for 
+    // With low ODR settings of 100 Hz, 95 Hz, and 6.25 Hz for the accelerometer, gyro, and magnetometer, respectively,
+    // the filter is updating at a ~150 Hz rate using the Madgwick scheme and ~200 Hz using the Mahony scheme.
+    // These filter update rates should be fast enough to maintain accurate platform orientation for 
     // stabilization control of a fast-moving robot or quadcopter. Compare to the update rate of 200 Hz
     // produced by the on-board Digital Motion Processor of Invensense's MPU6050 6 DoF and MPU9150 9DoF sensors.
     // The 3.3 V 8 MHz Pro Mini is doing pretty well!
