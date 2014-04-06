@@ -1,9 +1,9 @@
-LSM9SD0
+LSM9DS0
 =======
 
-LSM9SD0 9DOF sensor AHRS sketch
+LSM9DS0 9DOF sensor AHRS sketch
 
-Like the original LSM9SD0_simple.ino sketch, it'll demo the following:
+Like the original LSM9DS0_simple.ino sketch, it'll demo the following:
 * How to create a LSM9DS0 object, using a constructor (global
   variables section).
 * How to use the begin() function of the LSM9DS0 class.
