@@ -266,26 +266,42 @@ void loop()
 
   // Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
   // In this coordinate system, the positive z-axis is down toward Earth. 
-  // Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination, looking down on the sensor positive yaw is counterclockwise.
+  // Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination), 
+  // looking down on the sensor positive yaw is counterclockwise.
   // Pitch is angle between sensor x-axis and Earth ground plane, toward the Earth is positive, up toward the sky is negative.
   // Roll is angle between sensor y-axis and Earth ground plane, y-axis up is positive roll.
   // These arise from the definition of the homogeneous rotation matrix constructed from quaternions.
-  // Tait-Bryan angles as well as Euler angles are non-commutative; that is, the get the correct orientation the rotations must be
+  // Tait-Bryan angles as well as Euler angles are non-commutative; that is, to get the correct orientation the rotations must be
   // applied in the correct order which for this configuration is yaw, pitch, and then roll.
   // For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
     yaw   = atan2(2.0f * (q[1] * q[2] + q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3]);   
     pitch = -asin(2.0f * (q[1] * q[3] - q[0] * q[2]));
     roll  = atan2(2.0f * (q[0] * q[1] + q[2] * q[3]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]);
     pitch *= 180.0f / PI;
-    yaw   *= 180.0f / PI - 13.8; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
+    yaw   *= 180.0f / PI - 13.8f; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
     roll  *= 180.0f / PI;
 
+    Serial.print("ax = "); Serial.print((int)1000*ax);  
+    Serial.print(" ay = "); Serial.print((int)1000*ay); 
+    Serial.print(" az = "); Serial.print((int)1000*az); Serial.println(" mg");
+    Serial.print("gx = "); Serial.print( gx, 2); 
+    Serial.print(" gy = "); Serial.print( gy, 2); 
+    Serial.print(" gz = "); Serial.print( gz, 2); Serial.println(" deg/s");
+    Serial.print("mx = "); Serial.print( (int)1000*mx, 2); 
+    Serial.print(" my = "); Serial.print( (int)1000*my, 2); 
+    Serial.print(" mz = "); Serial.print( (int)1000*mz, 2); Serial.println(" mG");
+    
     Serial.print("Yaw, Pitch, Roll: ");
     Serial.print(yaw, 2);
     Serial.print(", ");
     Serial.print(pitch, 2);
     Serial.print(", ");
     Serial.println(roll, 2);
+    
+    Serial.print("q0 = "); Serial.print(q[0]);
+    Serial.print(" qx = "); Serial.print(q[1]); 
+    Serial.print(" qy = "); Serial.print(q[2]); 
+    Serial.print(" qz = "); Serial.println(q[3]); 
     
     Serial.print("deltat = "); Serial.println(deltat, 4);
 
@@ -425,6 +441,7 @@ void printOrientation(float x, float y, float z)
 
             // Normalise accelerometer measurement
             norm = sqrt(ax * ax + ay * ay + az * az);
+            if (norm == 0.0f) return; // handle NaN
             norm = 1.0f/norm;
             ax *= norm;
             ay *= norm;
@@ -432,6 +449,7 @@ void printOrientation(float x, float y, float z)
 
             // Normalise magnetometer measurement
             norm = sqrt(mx * mx + my * my + mz * mz);
+            if (norm == 0.0f) return; // handle NaN
             norm = 1.0f/norm;
             mx *= norm;
             my *= norm;
