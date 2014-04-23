@@ -141,12 +141,12 @@ const byte DRDYG  = 4; // DRDYG  tells us when gyro data is ready
 #define Kp 2.0f * 5.0f // these are the free parameters in the Mahony filter and fusion scheme, Kp for proportional feedback, Ki for integral
 #define Ki 0.0f
 
-uint16_t count = 0;  // used to control display output rate
-uint16_t delt_t = 0; // used to control display output rate
+uint32_t count = 0;  // used to control display output rate
+uint32_t delt_t = 0; // used to control display output rate
 float pitch, yaw, roll, heading;
 float deltat = 0.0f;        // integration interval for both filter schemes
-uint16_t lastUpdate = 0;    // used to calculate integration interval
-uint16_t now = 0;           // used to calculate integration interval
+uint32_t lastUpdate = 0;    // used to calculate integration interval
+uint32_t now = 0;           // used to calculate integration interval
 
 float ax, ay, az, gx, gy, gz, mx, my, mz; // variables to hold latest sensor data values 
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
@@ -185,7 +185,7 @@ void setup()
   // begin() returns a 16-bit value which includes both the gyro 
   // and accelerometers WHO_AM_I response. You can check this to
   // make sure communication was successful.
-  uint16_t status = dof.begin();
+  uint32_t status = dof.begin();
  
   Serial.print("LSM9DS0 WHO_AM_I's returned: 0x");
   Serial.println(status, HEX);
