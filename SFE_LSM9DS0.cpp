@@ -563,50 +563,34 @@ void LSM9DS0::initI2C()
 }
 
 void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
+        // Wire.h read and write protocols
+        void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
-	// Begin transmission at device write address
-	Wire.beginTransmission(address);
-	Wire.write(subAddress); // Write register to be written to
-	Wire.write(data); // Transmit byte to write
-	Wire.endTransmission(); // End I2C transmission
+	Wire.beginTransmission(address);  // Initialize the Tx buffer
+	Wire.write(subAddress);           // Put slave register address in Tx buffer
+	Wire.write(data);                 // Put data in Tx buffer
+	Wire.endTransmission();           // Send the Tx buffer
 }
 
-uint8_t LSM9DS0::I2CreadByte(uint8_t address, uint8_t subAddress)
+        uint8_t LSM9DS0::I2CreadByte(uint8_t address, uint8_t subAddress)
 {
-	uint8_t data; // `data` will store the register data
-	// Begin I2C transmission using device write address
-	Wire.beginTransmission(address); 
-	// Write the register to be read:
-	Wire.write(subAddress);	
-	// End write, but send a restart to keep connection alive:
-	Wire.endTransmission(false);
-	// Transmit device read address:
-	Wire.requestFrom(address, (uint8_t) 1);
-	while (Wire.available() < 1) // Wait until data becomes available
-		;
-	data = Wire.read(); // Read register data into `data` variable
-	Wire.endTransmission(); // End I2C transmission
-
-	return data; // Return data from register
+	uint8_t data; // `data` will store the register data	 
+	Wire.beginTransmission(address);         // Initialize the Tx buffer
+	Wire.write(subAddress);	                 // Put slave register address in Tx buffer
+	Wire.endTransmission(false);             // Send the Tx buffer, but send a restart to keep connection alive
+	Wire.requestFrom(address, (uint8_t) 1);  // Read one byte from slave register address 
+	data = Wire.read();                      // Fill Rx buffer with result
+	return data;                             // Return data read from slave register
 }
 
-void LSM9DS0::I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest,
-							uint8_t count)
+        void LSM9DS0::I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest, uint8_t count)
 {  
-	// Begin I2C transmission and send device address
-	Wire.beginTransmission(address);
+	Wire.beginTransmission(address);   // Initialize the Tx buffer
 	// Next send the register to be read. OR with 0x80 to indicate multi-read.
-	Wire.write(subAddress | 0x80);
-	// End write, but send a restart to keep connection alive:
-	Wire.endTransmission(false);
-	// Request `count` bytes of data from the device
-	Wire.requestFrom(address, count);
-	// Wait until the data has been read in
-	while (Wire.available() < count)
-		;
-	// Store all `count` bytes into the given destination array.
-	for (int i=0; i<count ;i++)
-		dest[i] = Wire.read();
-	// End I2C Transmission
-	Wire.endTransmission();
+	Wire.write(subAddress | 0x80);     // Put slave register address in Tx buffer
+	Wire.endTransmission(false);       // Send the Tx buffer, but send a restart to keep connection alive
+	uint8_t i = 0;
+        Wire.requestFrom(address, count);  // Read bytes from slave register address 
+	while (Wire.available()) {
+        dest[i++] = Wire.read(); }         // Put read results in the Rx buffer
 }
