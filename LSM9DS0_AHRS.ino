@@ -146,7 +146,7 @@ uint32_t delt_t = 0; // used to control display output rate
 float pitch, yaw, roll, heading;
 float deltat = 0.0f;        // integration interval for both filter schemes
 uint32_t lastUpdate = 0;    // used to calculate integration interval
-uint32_t now = 0;           // used to calculate integration interval
+uint32_t Now = 0;           // used to calculate integration interval
 
 float ax, ay, az, gx, gy, gz, mx, my, mz; // variables to hold latest sensor data values 
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
@@ -247,9 +247,9 @@ void loop()
     mz = dof.calcMag(dof.mz);
   }
 
-  now = micros();
-  deltat = ((now - lastUpdate)/1000000.0f); // set integration time by time elapsed since last filter update
-  lastUpdate = now;
+  Now = micros();
+  deltat = ((Now - lastUpdate)/1000000.0f); // set integration time by time elapsed since last filter update
+  lastUpdate = Now;
   // Sensors x- and y-axes are aligned but magnetometer z-axis (+ down) is opposite to z-axis (+ up) of accelerometer and gyro!
   // This is ok by aircraft orientation standards!  
   // Pass gyro rate as rad/s
