@@ -48,6 +48,11 @@ the only connections that need to be made:
 (CSG, CSXM, SDOG, and SDOXM should all be pulled high jumpers on 
   the breakout board will do this for you.)
   
+ Note: The LSM9DS0 in the I2C mode uses the Arduino Wire library. 
+ Because the sensor is not 5V tolerant, we are using a 3.3 V 8 MHz Pro Mini or a 3.3 V Teensy 3.1.
+ We have disabled the internal pull-ups used by the Wire library in the Wire.h/twi.c utility file.
+ We are also using the 400 kHz fast I2C mode by setting the TWI_FREQ  to 400000L /twi.h utility file.
+  
 If you're using SPI, here is an example hardware setup:
 	LSM9DS0 --------- Arduino
           CSG -------------- 9
@@ -121,8 +126,8 @@ LSM9DS0 dof(MODE_SPI, LSM9DS0_CSG, LSM9DS0_CSXM);
 ///////////////////////////////
 // Interrupt Pin Definitions //
 ///////////////////////////////
-const byte INT1XM = 2; // INT1XM tells us when accel data is ready
-const byte INT2XM = 3; // INT2XM tells us when mag data is ready
+const byte INT1XM = 3; // INT1XM tells us when accel data is ready
+const byte INT2XM = 2; // INT2XM tells us when mag data is ready
 const byte DRDYG  = 4; // DRDYG  tells us when gyro data is ready
 
 // global constants for 9 DoF fusion and AHRS (Attitude and Heading Reference System)
@@ -148,6 +153,7 @@ float deltat = 0.0f;        // integration interval for both filter schemes
 uint32_t lastUpdate = 0;    // used to calculate integration interval
 uint32_t Now = 0;           // used to calculate integration interval
 
+float abias[3] = {0, 0, 0}, gbias[3] = {0, 0, 0};
 float ax, ay, az, gx, gy, gz, mx, my, mz; // variables to hold latest sensor data values 
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
 float eInt[3] = {0.0f, 0.0f, 0.0f};       // vector to hold integral error for Mahony method
@@ -209,7 +215,7 @@ void setup()
  // Set output data rates  
  // Accelerometer output data rate (ODR) can be: A_ODR_3125 (3.225 Hz), A_ODR_625 (6.25 Hz), A_ODR_125 (12.5 Hz), A_ODR_25, A_ODR_50, 
  //                                              A_ODR_100,  A_ODR_200, A_ODR_400, A_ODR_800, A_ODR_1600 (1600 Hz)
-    dof.setAccelODR(dof.A_ODR_100); // Set accelerometer update rate at 100 Hz
+    dof.setAccelODR(dof.A_ODR_200); // Set accelerometer update rate at 100 Hz
  // Accelerometer anti-aliasing filter rate can be 50, 194, 362, or 763 Hz
  // Anti-aliasing acts like a low-pass filter allowing oversampling of accelerometer and rejection of high-frequency spurious noise.
  // Strategy here is to effectively oversample accelerometer at 100 Hz and use a 50 Hz anti-aliasing (low-pass) filter frequency
@@ -222,27 +228,31 @@ void setup()
 
  // Magnetometer output data rate can be: 3.125 (ODR_3125), 6.25 (ODR_625), 12.5 (ODR_125), 25, 50, or 100 Hz
     dof.setMagODR(dof.M_ODR_125); // Set magnetometer to update every 80 ms
+    
+ // Use the FIFO mode to average accelerometer and gyro readings to calculate the biases, which can then be removed from
+ // all subsequent measurements.
+    dof.calLSM9DS0(gbias, abias);
 }
 
 void loop()
 {
   if(digitalRead(DRDYG)) {  // When new gyro data is ready
   dof.readGyro();           // Read raw gyro data
-    gx = dof.calcGyro(dof.gx);   // Convert to degrees per seconds
-    gy = dof.calcGyro(dof.gy);
-    gz = dof.calcGyro(dof.gz);
+    gx = dof.calcGyro(dof.gx) - gbias[0];   // Convert to degrees per seconds, remove gyro biases
+    gy = dof.calcGyro(dof.gy) - gbias[1];
+    gz = dof.calcGyro(dof.gz) - gbias[2];
   }
   
   if(digitalRead(INT1XM)) {  // When new accelerometer data is ready
     dof.readAccel();         // Read raw accelerometer data
-    ax = dof.calcAccel(dof.ax);   // Convert to g's
-    ay = dof.calcAccel(dof.ay);
-    az = dof.calcAccel(dof.az);
+    ax = dof.calcAccel(dof.ax) - abias[0];   // Convert to g's, remove accelerometer biases
+    ay = dof.calcAccel(dof.ay) - abias[1];
+    az = dof.calcAccel(dof.az) - abias[2];
   }
   
   if(digitalRead(INT2XM)) {  // When new magnetometer data is ready
     dof.readMag();           // Read raw magnetometer data
-    mx = dof.calcMag(dof.mx);     // Convert to Gauss
+    mx = dof.calcMag(dof.mx);     // Convert to Gauss and correct for calibration
     my = dof.calcMag(dof.my);
     mz = dof.calcMag(dof.mz);
   }
@@ -278,8 +288,8 @@ void loop()
     pitch = -asin(2.0f * (q[1] * q[3] - q[0] * q[2]));
     roll  = atan2(2.0f * (q[0] * q[1] + q[2] * q[3]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]);
     pitch *= 180.0f / PI;
-    yaw   *= 180.0f / PI;
-    yaw   -=  13.8f; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
+    yaw   *= 180.0f / PI; 
+    yaw   -= 13.8; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
     roll  *= 180.0f / PI;
 
     Serial.print("ax = "); Serial.print((int)1000*ax);  
@@ -288,9 +298,9 @@ void loop()
     Serial.print("gx = "); Serial.print( gx, 2); 
     Serial.print(" gy = "); Serial.print( gy, 2); 
     Serial.print(" gz = "); Serial.print( gz, 2); Serial.println(" deg/s");
-    Serial.print("mx = "); Serial.print( (int)1000*mx, 2); 
-    Serial.print(" my = "); Serial.print( (int)1000*my, 2); 
-    Serial.print(" mz = "); Serial.print( (int)1000*mz, 2); Serial.println(" mG");
+    Serial.print("mx = "); Serial.print( (int)1000*mx); 
+    Serial.print(" my = "); Serial.print( (int)1000*my); 
+    Serial.print(" mz = "); Serial.print( (int)1000*mz); Serial.println(" mG");
     
     Serial.print("Yaw, Pitch, Roll: ");
     Serial.print(yaw, 2);
@@ -304,8 +314,7 @@ void loop()
     Serial.print(" qy = "); Serial.print(q[2]); 
     Serial.print(" qz = "); Serial.println(q[3]); 
     
-    Serial.print("deltat = "); Serial.println(deltat, 4);
-
+    Serial.print("filter rate = "); Serial.println(1.0f/deltat, 1);
     display.clearDisplay();
      
  
