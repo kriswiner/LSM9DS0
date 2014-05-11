@@ -218,7 +218,10 @@ public:
 	int16_t gx, gy, gz; // x, y, and z axis readings of the gyroscope
 	int16_t ax, ay, az; // x, y, and z axis readings of the accelerometer
 	int16_t mx, my, mz; // x, y, and z axis readings of the magnetometer
-	
+
+	float abias[3];
+        float gbias[3];
+
 	// LSM9DS0 -- LSM9DS0 class constructor
 	// The constructor will set up a handful of private variables, and set the
 	// communication mode as well.
@@ -328,7 +331,7 @@ public:
 	//		Must be a value from the accel_odr enum (check above, there're 11).
 	void setAccelODR(accel_odr aRate); 	
 
-// setAccelABW() -- Set the anti-aliasing filter rate of the accelerometer
+        // setAccelABW() -- Set the anti-aliasing filter rate of the accelerometer
 	// Input:
 	//	- abwRate = The desired anti-aliasing filter rate of the accel.
 	//		Must be a value from the accel_abw enum (check above, there're 4).
@@ -359,6 +362,10 @@ public:
 	void configGyroInt(uint8_t int1Cfg, uint16_t int1ThsX = 0,
 						  uint16_t int1ThsY = 0, uint16_t int1ThsZ = 0, 
 						  uint8_t duration = 0);
+
+
+        void calLSM9DS0(float gbias[3], float abias[3]);
+
 
 private:	
 	// xmAddress and gAddress store the I2C address or SPI chip select pin
