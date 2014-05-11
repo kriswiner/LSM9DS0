@@ -243,7 +243,82 @@ void LSM9DS0::initMag()
 	MIEN - Enable interrupt generation for magnetic data
 		0=disable, 1=enable) */
 	xmWriteByte(INT_CTRL_REG_M, 0x09); // Enable interrupts for mag, active-low, push-pull
+}// This is a function that uses the FIFO to accumulate sample of accelerometer and gyro data, average
+// them, scales them to  gs and deg/s, respectively, and then passes the biases to the main sketch
+// for subtraction from all subsequent data. There are no gyro and accelerometer bias registers to store
+// the data as there are in the ADXL345, a precursor to the LSM9DS0, or the MPU-9150, so we have to
+// subtract the biases ourselves. This results in a more accurate measurement in general and can
+// remove errors due to imprecise or varying initial placement. Calibration of sensor data in this manner
+// is good practice.
+
+void LSM9DS0::calLSM9DS0(float * gbias, float * abias)
+{  
+  uint8_t data[6] = {0, 0, 0, 0, 0, 0};
+  int16_t gyro_bias[3] = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
+  int samples, ii;
+  
+  // First get gyro bias
+  byte c = gReadByte(CTRL_REG5_G);
+  gWriteByte(CTRL_REG5_G, c | 0x40);         // Enable gyro FIFO  
+  delay(20);                                 // Wait for change to take effect
+  gWriteByte(FIFO_CTRL_REG_G, 0x20 | 0x1F);  // Enable gyro FIFO stream mode and set watermark at 32 samples
+  delay(1000);  // delay 1000 milliseconds to collect FIFO samples
+  
+  samples = (gReadByte(FIFO_SRC_REG_G) & 0x1F); // Read number of stored samples
+
+  for(ii = 0; ii < samples ; ii++) {            // Read the gyro data stored in the FIFO
+    gReadBytes(OUT_X_L_G,  &data[0], 6);
+    gyro_bias[0] += (((int16_t)data[1] << 8) | data[0]);
+    gyro_bias[1] += (((int16_t)data[3] << 8) | data[2]);
+    gyro_bias[2] += (((int16_t)data[5] << 8) | data[4]);
+  }  
+
+  gyro_bias[0] /= samples; // average the data
+  gyro_bias[1] /= samples; 
+  gyro_bias[2] /= samples; 
+  
+  gbias[0] = (float)gyro_bias[0]*gRes;  // Properly scale the data to get deg/s
+  gbias[1] = (float)gyro_bias[1]*gRes;
+  gbias[2] = (float)gyro_bias[2]*gRes;
+  
+  c = gReadByte(CTRL_REG5_G);
+  gWriteByte(CTRL_REG5_G, c & ~0x40);  // Disable gyro FIFO  
+  delay(20);
+  gWriteByte(FIFO_CTRL_REG_G, 0x00);   // Enable gyro bypass mode
+  
+
+  //  Now get the accelerometer biases
+  c = xmReadByte(CTRL_REG0_XM);
+  xmWriteByte(CTRL_REG0_XM, c | 0x40);      // Enable accelerometer FIFO  
+  delay(20);                                // Wait for change to take effect
+  xmWriteByte(FIFO_CTRL_REG, 0x20 | 0x1F);  // Enable accelerometer FIFO stream mode and set watermark at 32 samples
+  delay(1000);  // delay 1000 milliseconds to collect FIFO samples
+
+  samples = (xmReadByte(FIFO_SRC_REG) & 0x1F); // Read number of stored accelerometer samples
+
+   for(ii = 0; ii < samples ; ii++) {          // Read the accelerometer data stored in the FIFO
+    xmReadBytes(OUT_X_L_A, &data[0], 6);
+    accel_bias[0] += (((int16_t)data[1] << 8) | data[0]);
+    accel_bias[1] += (((int16_t)data[3] << 8) | data[2]);
+    accel_bias[2] += (((int16_t)data[5] << 8) | data[4]) - (int16_t)(1./aRes); // Assumes sensor facing up!
+  }  
+
+  accel_bias[0] /= samples; // average the data
+  accel_bias[1] /= samples; 
+  accel_bias[2] /= samples; 
+  
+  abias[0] = (float)accel_bias[0]*aRes; // Properly scale data to get gs
+  abias[1] = (float)accel_bias[1]*aRes;
+  abias[2] = (float)accel_bias[2]*aRes;
+
+  c = xmReadByte(CTRL_REG0_XM);
+  xmWriteByte(CTRL_REG0_XM, c & ~0x40);    // Disable accelerometer FIFO  
+  delay(20);
+  xmWriteByte(FIFO_CTRL_REG, 0x00);       // Enable accelerometer bypass mode
 }
+
+
+
 
 void LSM9DS0::readAccel()
 {
