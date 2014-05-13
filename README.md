@@ -22,3 +22,5 @@ In addition, the sketch will demo:
   orientation relative to a fixed Earth frame providing absolute orientation information for subsequent use.
 * An example of how to use the quaternion data to generate standard aircraft orientation data in the form of
   Tait-Bryan angles representing the sensor yaw, pitch, and roll angles suitable for any vehicle stablization control application.
+
+A discussion of the use and limitations of this sensor and sensor fusion in general is found here: https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion.
