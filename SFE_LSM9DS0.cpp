@@ -643,52 +643,6 @@ void LSM9DS0::initI2C()
 	Wire.begin();	// Initialize I2C library
 }
 
-
-//void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
-//{
-//	// Begin transmission at device write address
-//	Wire.beginTransmission(address);
-//	Wire.write(subAddress); // Write register to be written to
-//	Wire.write(data); // Transmit byte to write
-//	Wire.endTransmission(); // End I2C transmission
-//}
-
-//uint8_t LSM9DS0::I2CreadByte(uint8_t address, uint8_t subAddress)
-//{
-//	uint8_t data; // `data` will store the register data
-//	// Begin I2C transmission using device write address
-//	Wire.beginTransmission(address); 
-//	// Write the register to be read:
-//	Wire.write(subAddress);	
-//	// End write, but send a restart to keep connection alive:
-//	Wire.endTransmission(false);
-//	// Transmit device read address:
-//	Wire.requestFrom(address, (uint8_t) 1);
-//	while (Wire.available() < 1) // Wait until data becomes available
-//}
-
-//void LSM9DS0::I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest,
-//							uint8_t count)
-//{  
-//	// Begin I2C transmission and send device address
-//	Wire.beginTransmission(address);
-//	// Next send the register to be read. OR with 0x80 to indicate multi-read.
-//	Wire.write(subAddress | 0x80);
-//	// End write, but send a restart to keep connection alive:
-//	Wire.endTransmission(false);
-//	// Request `count` bytes of data from the device
-//	Wire.requestFrom(address, count);
-//	// Wait until the data has been read in
-//	while (Wire.available() < count)
-//		;
-//	// Store all `count` bytes into the given destination array.
-//	for (int i=0; i<count ;i++)
-//		dest[i] = Wire.read();
-//	// End I2C Transmission
-//	Wire.endTransmission();
-//}
-
-
         // Wire.h read and write protocols
         void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
