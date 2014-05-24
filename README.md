@@ -13,7 +13,8 @@ Like the original LSM9DS0_simple.ino sketch, it'll demo the following:
 * How to calculate actual acceleration, rotation speed, magnetic
   field strength using the calcAccel(), calcGyro() and calcMag()
   functions.
-  
+* How to get the temperature from the accelerometer and display on the Serial monitor in degrees Centigrade.
+
 In addition, the sketch will demo:
 * How to check for data updates using interrupts
 * How to display output at a rate different from the sensor data update and fusion filter update rates
