@@ -204,7 +204,7 @@ void LSM9DS0::initMag()
 		0=interrupt request not latched, 1=interrupt request latched
 	LIR1 - Latch interrupt request on INT1_SRC (cleared by readging INT1_SRC)
 		0=irq not latched, 1=irq latched 									 */
-	xmWriteByte(CTRL_REG5_XM, 0x14); // Mag data rate - 100 Hz
+	xmWriteByte(CTRL_REG5_XM, 0x94); // Mag data rate - 100 Hz, enable temperature sensor
 	
 	/* CTRL_REG6_XM sets the magnetometer full-scale
 	Bits (7-0): 0 MFS1 MFS0 0 0 0 0 0
@@ -243,7 +243,9 @@ void LSM9DS0::initMag()
 	MIEN - Enable interrupt generation for magnetic data
 		0=disable, 1=enable) */
 	xmWriteByte(INT_CTRL_REG_M, 0x09); // Enable interrupts for mag, active-low, push-pull
-}// This is a function that uses the FIFO to accumulate sample of accelerometer and gyro data, average
+}
+
+// This is a function that uses the FIFO to accumulate sample of accelerometer and gyro data, average
 // them, scales them to  gs and deg/s, respectively, and then passes the biases to the main sketch
 // for subtraction from all subsequent data. There are no gyro and accelerometer bias registers to store
 // the data as there are in the ADXL345, a precursor to the LSM9DS0, or the MPU-9150, so we have to
@@ -317,9 +319,6 @@ void LSM9DS0::calLSM9DS0(float * gbias, float * abias)
   xmWriteByte(FIFO_CTRL_REG, 0x00);       // Enable accelerometer bypass mode
 }
 
-
-
-
 void LSM9DS0::readAccel()
 {
 	uint8_t temp[6]; // We'll read six bytes from the accelerometer into temp	
@@ -336,6 +335,13 @@ void LSM9DS0::readMag()
 	mx = (temp[1] << 8) | temp[0]; // Store x-axis values into mx
 	my = (temp[3] << 8) | temp[2]; // Store y-axis values into my
 	mz = (temp[5] << 8) | temp[4]; // Store z-axis values into mz
+}
+
+void LSM9DS0::readTemp()
+{
+	uint8_t temp[2]; // We'll read two bytes from the temperature sensor into temp	
+	xmReadBytes(OUT_TEMP_L_XM, temp, 2); // Read 2 bytes, beginning at OUT_TEMP_L_M
+        temperature = (((int16_t) temp[1] << 12) | temp[0] << 4 ) >> 4; // Temperature is a 12-bit signed integer
 }
 
 void LSM9DS0::readGyro()
@@ -637,7 +643,52 @@ void LSM9DS0::initI2C()
 	Wire.begin();	// Initialize I2C library
 }
 
-void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
+
+//void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
+//{
+//	// Begin transmission at device write address
+//	Wire.beginTransmission(address);
+//	Wire.write(subAddress); // Write register to be written to
+//	Wire.write(data); // Transmit byte to write
+//	Wire.endTransmission(); // End I2C transmission
+//}
+
+//uint8_t LSM9DS0::I2CreadByte(uint8_t address, uint8_t subAddress)
+//{
+//	uint8_t data; // `data` will store the register data
+//	// Begin I2C transmission using device write address
+//	Wire.beginTransmission(address); 
+//	// Write the register to be read:
+//	Wire.write(subAddress);	
+//	// End write, but send a restart to keep connection alive:
+//	Wire.endTransmission(false);
+//	// Transmit device read address:
+//	Wire.requestFrom(address, (uint8_t) 1);
+//	while (Wire.available() < 1) // Wait until data becomes available
+//}
+
+//void LSM9DS0::I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest,
+//							uint8_t count)
+//{  
+//	// Begin I2C transmission and send device address
+//	Wire.beginTransmission(address);
+//	// Next send the register to be read. OR with 0x80 to indicate multi-read.
+//	Wire.write(subAddress | 0x80);
+//	// End write, but send a restart to keep connection alive:
+//	Wire.endTransmission(false);
+//	// Request `count` bytes of data from the device
+//	Wire.requestFrom(address, count);
+//	// Wait until the data has been read in
+//	while (Wire.available() < count)
+//		;
+//	// Store all `count` bytes into the given destination array.
+//	for (int i=0; i<count ;i++)
+//		dest[i] = Wire.read();
+//	// End I2C Transmission
+//	Wire.endTransmission();
+//}
+
+
         // Wire.h read and write protocols
         void LSM9DS0::I2CwriteByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
