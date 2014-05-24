@@ -157,6 +157,7 @@ float abias[3] = {0, 0, 0}, gbias[3] = {0, 0, 0};
 float ax, ay, az, gx, gy, gz, mx, my, mz; // variables to hold latest sensor data values 
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
 float eInt[3] = {0.0f, 0.0f, 0.0f};       // vector to hold integral error for Mahony method
+float temperature;
 
 void setup()
 {
@@ -255,6 +256,9 @@ void loop()
     mx = dof.calcMag(dof.mx);     // Convert to Gauss and correct for calibration
     my = dof.calcMag(dof.my);
     mz = dof.calcMag(dof.mz);
+    
+    dof.readTemp();
+    temperature = 21.0 + (float) dof.temperature/8.; // slope is 8 LSB per degree C, just guessing at the intercept
   }
 
   Now = micros();
@@ -301,6 +305,8 @@ void loop()
     Serial.print("mx = "); Serial.print( (int)1000*mx); 
     Serial.print(" my = "); Serial.print( (int)1000*my); 
     Serial.print(" mz = "); Serial.print( (int)1000*mz); Serial.println(" mG");
+    
+    Serial.print("temperature = "); Serial.println(temperature, 2);
     
     Serial.print("Yaw, Pitch, Roll: ");
     Serial.print(yaw, 2);
