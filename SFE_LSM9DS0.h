@@ -218,7 +218,7 @@ public:
 	int16_t gx, gy, gz; // x, y, and z axis readings of the gyroscope
 	int16_t ax, ay, az; // x, y, and z axis readings of the accelerometer
 	int16_t mx, my, mz; // x, y, and z axis readings of the magnetometer
-
+        int16_t temperature;
 	float abias[3];
         float gbias[3];
 
@@ -273,6 +273,12 @@ public:
 	// The readings are stored in the class' mx, my, and mz variables. Read
 	// those _after_ calling readMag().
 	void readMag();
+
+	// readTemp() -- Read the temperature output register.
+	// This function will read two temperature output registers.
+	// The combined readings are stored in the class' temperature variables. Read
+	// those _after_ calling readTemp().
+	void readTemp();
 	
 	// calcGyro() -- Convert from RAW signed 16-bit value to degrees per second
 	// This function reads in a signed 16-bit value and returns the scaled
