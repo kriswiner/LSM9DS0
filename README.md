@@ -16,6 +16,7 @@ Like the original LSM9DS0_simple.ino sketch, it'll demo the following:
 * How to get the temperature from the accelerometer and display on the Serial monitor in degrees Centigrade.
 
 In addition, the sketch will demo:
+* How to calculate and correct for the accelerometer and gyro biases
 * How to check for data updates using interrupts
 * How to display output at a rate different from the sensor data update and fusion filter update rates
 * How to specify the accelerometer anti-aliasing (low-pass) filter rate
