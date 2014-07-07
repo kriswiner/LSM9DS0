@@ -26,4 +26,4 @@ In addition, the sketch will demo:
 
 A discussion of the use and limitations of this sensor and sensor fusion in general is found ![here.]( https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion)
 
-A description of the modular Teensy Project which uses the LSM9DS0 motion sensor,among others, is described ~[here](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project)
+A description of the modular Teensy Project which uses the LSM9DS0 motion sensor,among others, is described [here.](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project)
