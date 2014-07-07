@@ -24,4 +24,6 @@ In addition, the sketch will demo:
 * An example of how to use the quaternion data to generate standard aircraft orientation data in the form of
   Tait-Bryan angles representing the sensor yaw, pitch, and roll angles suitable for any vehicle stablization control application.
 
-A discussion of the use and limitations of this sensor and sensor fusion in general is found here: https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion.
+A discussion of the use and limitations of this sensor and sensor fusion in general is found ![here.]( https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion)
+
+A description of the modular Teensy Project which uses the LSM9DS0 motion sensor,among others, is described ~[here](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project)
