@@ -1,7 +1,7 @@
 LSM9DS0 9-axis motion sensor with MPL3115A2 pressure sensor/altimeter mini add-on shield for the Teensy 3.1 microcontroller.
 
 This sketch and library are specifically for the [LSM9DS0MiniTeensyShield.v05](https://www.oshpark.com/profiles/PeskyProducts/page/2)
-which has been hardwired for I2C communication using the i2c_t3.h i2c Wire library specifically designed for use with the Teensy 3.1.
+which has been hardwired for I2C communication using the i2c_t3.h Wire library specifically designed for use with the Teensy 3.1.
 
 There is only one way to install the Mini shield, at the end opposite the USB port either above or below the Teensy 3.1 proper.
 Either way, SDA/SCL will be on pins 17 and 16, respectively, power and ground will be the two corresponding pins on the bottom
@@ -17,7 +17,7 @@ The accel/gyro axis orientation is printed on the add-on shield.
 
 The add-on shield has 10 kOhm pullup resistors on board with a jumper that can be adjusted to disable them if other
 pullups are already in the circuit. However, this is impossible to do once the board is mounted so adjust your configuration 
-accordingly. Perhaps ina future revision I will move the jumpers to the back of the Teensy 3.1 add-on shield for easier
+accordingly. Perhaps in a future revision I will move the jumpers to the back of the Teensy 3.1 add-on shield for easier
 re-configuration.
 
 This add-on shield is one of many designed as part of the [Modular Teensy project](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project).
