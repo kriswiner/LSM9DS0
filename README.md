@@ -27,4 +27,9 @@ In addition, the sketch will demo:
 
 A discussion of the use and limitations of this sensor and sensor fusion in general is found ![here.]( https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion)
 
+I added a sketch specifically for the LSM9DS0 Mini and Micro-Add-On shields. They use a Teensy 3.1-specific i2c Wire library called i2c_t3.h.
+
 A description of the modular Teensy Project which uses the LSM9DS0 motion sensor, among others, is described [here.](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project)
+
+For a discussion of the relative merits of modern board-mounted pressure sensors, see [here](https://github.com/kriswiner/MPU-9250/wiki/Small-pressure-sensors).
+
