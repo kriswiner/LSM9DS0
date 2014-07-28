@@ -27,7 +27,7 @@ In addition, the sketch will demo:
 
 A discussion of the use and limitations of this sensor and sensor fusion in general is found ![here.]( https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion)
 
-I added a sketch specifically for the LSM9DS0 Mini and Micro-Add-On shields. They use a Teensy 3.1-specific i2c Wire library called i2c_t3.h.
+I added a sketch specifically for the [LSM9DS0 Mini and Micro-Add-On shields.](https://www.tindie.com/products/onehorse/lsm9ds0-teensy-31-mini-shield/)  It uses a Teensy 3.1-specific i2c Wire library called i2c_t3.h, which allows easy access to Teensy-specific capabilities such as specification of which set of hardware i2c pins will be used, the bus speed (up to 1 MHz!) and also allows master and/or slave designation to handle multiplexing between i2c devices. See www.pjrc.com/teensy and  http://forum.pjrc.com/threads/21680-New-I2C-library-for-Teensy3 for details.
 
 A description of the modular Teensy Project which uses the LSM9DS0 motion sensor, among others, is described [here.](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project)
 
