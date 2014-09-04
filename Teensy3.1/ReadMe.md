@@ -12,15 +12,14 @@ and finally, the accel/gyro address pin ADO is on pin 15.
 I recommend mounting the add-on shield below the Teensy 3.1 since the pressure sensor is somewhat light sensitive and mounting below
 will provide some light screening. Also, mounting above will complicate access to the Teensy 3.1 reset button.
 
-When properly mounted, the x-axis, which is the reference axis for True North is perpendicular to the Teensy 3.1 long axis.
-The accel/gyro axis orientation is printed on the add-on shield.
+When properly mounted, the x-axis of the mini shield, which is the reference axis for True North is perpendicular to the Teensy 3.1 long axis. The accel/gyro axis orientation is printed on the add-on shield.
 
 The add-on shield has 4K7 Ohm pullup resistors on board with a jumper that can be adjusted to disable them if other
 pullups are already in the circuit. However, this is impossible to do once the board is mounted so adjust your configuration 
 accordingly. Perhaps in a future revision I will move the jumpers to the back of the Teensy 3.1 add-on shield for easier
 re-configuration.
 
-There is also only one way to mount the microshield. See the sketch for more details of the use of both of these boards.
+There is also only one way to mount the microshield. When properly mounted, the x-axis of the micro shield, which is the reference axis for True North is perpendicular to the Teensy 3.1 long axis. The accel/gyro x-axis orientation is printed on the top of the micro add-on shield. See the sketch for more details of the use of both of these boards.
 
 This add-on shield is one of many designed as part of the [Modular Teensy project](https://github.com/kriswiner/LSM9DS0/wiki/Modular-Teensy-Project).
 
